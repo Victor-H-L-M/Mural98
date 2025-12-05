@@ -4,7 +4,7 @@ const formUsuario = document.getElementById('form-usuario');
 const formRecado = document.getElementById('form-recado');
 const listaRecados = document.getElementById('lista-recados');
 
-const API_URL = 'https://vercel-project.vercel.app';
+const API_URL = 'https://mural98-j11w.vercel.app/';
 
 
 formUsuario.addEventListener('submit', async (e) => {
