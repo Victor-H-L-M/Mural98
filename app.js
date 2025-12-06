@@ -1,12 +1,9 @@
-// APP.JS CARREGADO
-console.log('APP.JS CARREGADO');
-
 const formUsuario = document.getElementById('form-usuario');
 const formRecado = document.getElementById('form-recado');
 const listaRecados = document.getElementById('lista-recados');
 
 // Remover a barra final para evitar // ao concatenar
-const API_URL = 'https://mural98-j11w.vercel.app';
+const API_URL = '/api'; // <- alterado para chamadas relativas a /api
 
 if (!formUsuario) console.warn('form-usuario não encontrado no DOM');
 if (!formRecado) console.warn('form-recado não encontrado no DOM');
@@ -33,7 +30,6 @@ if (formUsuario) {
       });
 
       if (!res.ok) {
-        // tenta ler texto ou json com mensagem de erro para debug
         let detalhe = '';
         try {
           detalhe = await res.text();
@@ -44,7 +40,6 @@ if (formUsuario) {
         throw new Error(`Erro ao cadastrar usuário (status ${res.status}): ${detalhe}`);
       }
 
-      // opcional: ler resposta JSON para obter id criado
       let dados = null;
       try {
         dados = await res.json();
@@ -113,41 +108,25 @@ async function carregarRecados() {
   try {
     const res = await fetch(`${API_URL}/recados`);
     if (!res.ok) {
-      const txt = await res.text().catch(() => '');
-      throw new Error(`Erro ao buscar recados (status ${res.status}): ${txt}`);
+      let detalhe = '';
+      try {
+        detalhe = await res.text();
+      } catch (err) {
+        detalhe = '(não foi possível ler o corpo da resposta)';
+      }
+      console.error('Falha ao buscar recados', res.status, detalhe);
+      return;
     }
     const dados = await res.json();
-
-    console.log('Recados recebidos:', dados);
-
     listaRecados.innerHTML = '';
-
-    dados.forEach(recado => {
+    dados.forEach(r => {
       const li = document.createElement('li');
-
-      let nomeUsuario = 'Usuário';
-
-      // Lida com diferentes formatos possíveis de usuario_id
-      if (recado.usuario_id) {
-        if (typeof recado.usuario_id === 'string' || typeof recado.usuario_id === 'number') {
-          nomeUsuario = String(recado.usuario_id);
-        } else if (Array.isArray(recado.usuario_id) && recado.usuario_id.length > 0) {
-          nomeUsuario = recado.usuario_id[0]?.nome || String(recado.usuario_id[0]) || 'Usuário';
-        } else if (recado.usuario_id.nome) {
-          nomeUsuario = recado.usuario_id.nome;
-        }
-      }
-
-      li.textContent = `${nomeUsuario}: ${recado.mensagem}`;
+      li.textContent = `${r.usuario_id?.nome || 'Usuário'}: ${r.mensagem}`;
       listaRecados.appendChild(li);
     });
-
   } catch (err) {
-    console.error('Erro ao carregar recados:', err);
+    console.error(err);
   }
 }
 
-// Carrega ao iniciar (se o elemento existir)
-if (listaRecados) {
-  carregarRecados();
-}
+carregarRecados();
