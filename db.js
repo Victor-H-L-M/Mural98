@@ -12,5 +12,5 @@ process.exit(1);
 }
 
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 module.exports = supabase;
