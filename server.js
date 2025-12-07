@@ -9,12 +9,22 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+console.log('[DEBUG] Express app initialized');
 
 const PORT = process.env.PORT || 4000;
 
+// Global error handler for uncaught exceptions
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+  process.exit(1);
+});
 
 // Rota: listar recados
-app.get('/recados', async (req, res) => {
+app.get('/api/recados', async (req, res) => {
   const { data, error } = await supabase
     .from('recados')
     .select(`
@@ -35,7 +45,7 @@ app.get('/recados', async (req, res) => {
 
 
 // Rota: criar recado
-app.post('/recados', async (req, res) => {
+app.post('/api/recados', async (req, res) => {
 try {
 const { mensagem, usuario_id } = req.body;
 if (!mensagem || !usuario_id) {
@@ -60,14 +70,13 @@ res.status(500).json({ error: 'Erro ao criar recado' });
 
 
 // Rota: criar usuário
-app.post('/usuario_id', async (req, res) => {
+app.post('/api/usuario_id', async (req, res) => {
 try {
 const { nome } = req.body;
 if (!nome) return res.status(400).json({ error: 'nome é obrigatório' });
 
-
 const { data, error } = await supabase
-.from('usuario_id')
+.from('usuarios')
 .insert([{ nome }])
 .select()
 .single();
@@ -83,3 +92,10 @@ res.status(500).json({ error: 'Erro ao criar usuário' });
 
 
 app.listen(PORT, () => console.log(`API rodando na porta ${PORT}`));
+
+console.log('[DEBUG] Server listening - now waiting for requests');
+
+// Keep the process alive
+setInterval(() => {
+  // This prevents the process from exiting
+}, 60000);
