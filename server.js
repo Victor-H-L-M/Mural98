@@ -99,5 +99,3 @@ console.log('[DEBUG] Server listening - now waiting for requests');
 setInterval(() => {
   // This prevents the process from exiting
 }, 60000);
-
-module.exports = app;
